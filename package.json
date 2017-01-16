@@ -1,0 +1,29 @@
+{
+  "name": "bulk-force",
+  "version": "1.0.0",
+  "description": "Module to bulk load data to Salesforce.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chance": "^1.0.4",
+    "merge": "^1.2.0",
+    "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0"
+  },
+  "scripts": {
+    "test": "mocha test/* --timeout 5000",
+    "unit": "mocha test/unit",
+    "int": "mocha test/int --timeout 5000"
+  },
+  "keywords": [
+    "Salesforce"
+  ],
+  "author": "Brian Roller",
+  "license": "ISC"
+}
