@@ -1,7 +1,8 @@
 const salesforceLogin = require('../../lib/salesforce-login-api');
 const salesforceBulk = require('../../lib/salesforce-bulk-api');
-const request = require('request');
+const salesforceRest = require('../../lib/salesforce-rest-api');
 const chai = require('chai');
+const expect = chai.expect;
 
 chai.should();
 
@@ -29,7 +30,7 @@ describe('salesforce-bulk-api:integration', () => {
     });
 
     describe('batches', () => {
-        it('#createBatch(opts, cb)', (done) => {
+        it('create and complete batch', (done) => {
             salesforceLogin.usernamePassword({}, (err, auth) => {
                 var opts = {
                     auth,
@@ -43,16 +44,35 @@ describe('salesforce-bulk-api:integration', () => {
                         auth,
                         jobId: jobInfo.id,
                         data: [
-                            {Name: "My Bulk Force Batch 0"},
-                            {Name: "My Bulk Force Batch 1"}                            
+                            { Name: "My Bulk Force Batch 0" },
+                            { Name: "My Bulk Force Batch 1" }
                         ]
                     };
 
                     salesforceBulk.createBatch(opts, (err, batchInfo) => {
                         batchInfo.id.should.exist;
 
-                        salesforceBulk.closeJob(auth, jobInfo.id, err => {
-                            done();
+                        var opts = {
+                            auth,
+                            jobId: jobInfo.id,
+                            batchId: batchInfo.id
+                        };
+
+                        salesforceBulk.completeBatch(opts, (err, batchInfo) => {
+                            batchInfo.state.should.equal('Completed');
+
+                            salesforceBulk.getBatchResult(opts, (err, result) => {
+                                result.should.be.an.instanceof(Array);
+
+                                salesforceBulk.closeJob(auth, jobInfo.id, err => {
+                                    opts.object = 'Account';
+                                    
+                                    salesforceRest.deleteRecords(opts, result, err => {
+                                        expect(err).to.not.exist;
+                                        done();
+                                    });
+                                });
+                            });
                         });
                     });
                 });

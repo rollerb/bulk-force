@@ -55,14 +55,20 @@ describe('salesforce-bulk-api:unit', () => {
         });
 
         it('should fail with error message when non-201 response', (done) => {
-            checkInvalidStatusCode('create job', cb => {
-                salesforceBulk.createJob(opts, cb);
+            checkInvalidStatusCode({
+                action: 'create job',
+                process: cb => {
+                    salesforceBulk.createJob(opts, cb);
+                }
             }, done);
         });
 
         it('should fail with error message when unexpected request error', (done) => {
-            checkUnexpectedException('create job', cb => {
-                salesforceBulk.createJob(opts, cb);
+            checkUnexpectedException({
+                action: 'create job',
+                process: cb => {
+                    salesforceBulk.createJob(opts, cb);
+                }
             }, done);
         });
     });
@@ -89,14 +95,20 @@ describe('salesforce-bulk-api:unit', () => {
         });
 
         it('should fail with error message when non-200 response', (done) => {
-            checkInvalidStatusCode('close job', cb => {
-                salesforceBulk.closeJob(opts.auth, chance.string(), cb);
+            checkInvalidStatusCode({
+                action: 'close job',
+                process: cb => {
+                    salesforceBulk.closeJob(opts.auth, chance.string(), cb);
+                }
             }, done);
         });
 
         it('should fail with error message when unexpected request error', (done) => {
-            checkUnexpectedException('close job', cb => {
-                salesforceBulk.closeJob(opts.auth, chance.string(), cb);
+            checkUnexpectedException({
+                action: 'close job',
+                process: cb => {
+                    salesforceBulk.closeJob(opts.auth, chance.string(), cb);
+                }
             }, done);
         });
     });
@@ -126,48 +138,149 @@ describe('salesforce-bulk-api:unit', () => {
         });
 
         it('should fail with error message when non-201 status code', (done) => {
-            checkInvalidStatusCode('create batch', cb => {
-                salesforceBulk.createBatch(opts, cb);
+            checkInvalidStatusCode({
+                action: 'create batch',
+                process: cb => {
+                    salesforceBulk.createBatch(opts, cb);
+                }
             }, done);
         });
 
         it('should fail with error message when unexpected request error', (done) => {
-            checkUnexpectedException('create batch', cb => {
-                salesforceBulk.createBatch(opts, cb);
+            checkUnexpectedException({
+                action: 'create batch',
+                process: cb => {
+                    salesforceBulk.createBatch(opts, cb);
+                }
             }, done);
         });
     });
 
-    function checkInvalidStatusCode(action, process, done) {
+    describe('#completeBatch(opts, cb)', () => {
+        beforeEach(() => {
+            opts.jobId = chance.string();
+            opts.batchId = chance.string();
+            opts.frequency = 10;
+        });
+
+        it('should wait for batch to complete and return latest batch info', done => {
+            // given data
+            var expectedBatchInfo = { id: chance.string(), state: chance.pickone(['Completed', 'Failed', 'Not Processed']) };
+
+            // given mocks
+            var requestStub = sandbox.stub(request, 'get');
+            requestStub.onCall(0).yields(null, {
+                statusCode: 200
+            }, {
+                    state: 'InProgress'
+                });
+            requestStub.onCall(1).yields(null, {
+                statusCode: 200
+            }, expectedBatchInfo);
+
+            // when
+            salesforceBulk.completeBatch(opts, (err, batchInfo) => {
+                batchInfo.should.equal(expectedBatchInfo);
+                done();
+            });
+        });
+
+        it('should fail with error message when non-200 status code', (done) => {
+            checkInvalidStatusCode({
+                action: 'get batch details',
+                method: 'get',
+                process: cb => {
+                    salesforceBulk.completeBatch(opts, cb);
+                }
+            }, done);
+        });
+
+        it('should fail with error message when unexpected request error', (done) => {
+            checkUnexpectedException({
+                action: 'get batch details',
+                method: 'get',
+                process: cb => {
+                    salesforceBulk.completeBatch(opts, cb);
+                }
+            }, done);
+        });
+    });
+
+    describe('#getBatchResult(opts, cb)', () => {
+        beforeEach(() => {
+            opts.jobId = chance.string();
+            opts.batchId = chance.string();
+        });
+
+        it('should get batch result', done => {
+            // given data
+            var expectedResult = [{id: chance.string()}];
+
+            // given mocks
+            sandbox.stub(request, 'get').yields(null, {
+                statusCode: 200
+            }, expectedResult);
+
+            // when
+            salesforceBulk.getBatchResult(opts, (err, result) => {
+                result.should.equal(expectedResult);
+                done();
+            });
+        });
+
+        it('should fail with error message when non-200 status code', (done) => {
+            checkInvalidStatusCode({
+                action: 'get batch result',
+                method: 'get',
+                process: cb => {
+                    salesforceBulk.getBatchResult(opts, cb);
+                }
+            }, done);
+        });
+
+        it('should fail with error message when unexpected request error', (done) => {
+            checkUnexpectedException({
+                action: 'get batch result',
+                method: 'get',
+                process: cb => {
+                    salesforceBulk.getBatchResult(opts, cb);
+                }
+            }, done);
+        });        
+    });
+
+    function checkInvalidStatusCode(opts, done) {
         // given data
         var expectedException = {
             exceptionCode: chance.string(),
             exceptionMessage: chance.string()
         };
+        var method = opts.method || 'post';
 
         // given mocks
-        sandbox.stub(request, 'post').yields(null, {
+        sandbox.stub(request, method).yields(null, {
             statusCode: 500
         }, expectedException);
 
         // when
-        process(err => {
-            err.should.equal(`Failed to ${action}. Error received: ${expectedException.exceptionCode}; ${expectedException.exceptionMessage}`);
+        opts.process(err => {
+            err.should.equal(`Failed to ${opts.action}. Error received: ${expectedException.exceptionCode}; ${expectedException.exceptionMessage}`);
             done();
         });
     }
 
-    function checkUnexpectedException(action, process, done) {
+    function checkUnexpectedException(opts, done) {
         // given data
         var expectedError = chance.string();
+        var method = opts.method || 'post';
 
         // given mocks
-        sandbox.stub(request, 'post').yields(expectedError);
+        sandbox.stub(request, method).yields(expectedError);
 
         // when
-        process(err => {
-            err.should.equal(`Failed to ${action} due to unexpected error: ${expectedError}`);
+        opts.process(err => {
+            err.should.equal(`Failed to ${opts.action} due to unexpected error: ${expectedError}`);
             done();
-        });        
+        });
     }
 });

@@ -7,6 +7,7 @@
     "test": "test"
   },
   "dependencies": {
+    "async": "^2.1.4",
     "request": "^2.79.0"
   },
   "devDependencies": {
@@ -17,9 +18,9 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "mocha test/* --timeout 5000",
+    "test": "mocha test/* --timeout 10000",
     "unit": "mocha test/unit",
-    "int": "mocha test/int --timeout 5000"
+    "int": "mocha test/int --timeout 10000"
   },
   "keywords": [
     "Salesforce"
