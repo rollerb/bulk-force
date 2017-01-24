@@ -8,7 +8,10 @@
   },
   "dependencies": {
     "async": "^2.1.4",
-    "request": "^2.79.0"
+    "csvtojson": "^1.1.3",
+    "debug": "^2.6.0",
+    "request": "^2.79.0",
+    "xml2js": "^0.4.17"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -20,7 +23,7 @@
   "scripts": {
     "test": "mocha test/* --timeout 10000",
     "unit": "mocha test/unit",
-    "int": "mocha test/int --timeout 10000"
+    "int": "DEBUG=bulk-force:* mocha test/int --timeout 10000"
   },
   "keywords": [
     "Salesforce"

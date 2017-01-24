@@ -52,6 +52,30 @@ describe('salesforce-rest-api:unit', () => {
             });
         });
 
+        it('should find id or Id', (done) => {
+            // given data
+            opts.object = chance.string();
+            var records = [
+                { id: chance.string() },
+                { Id: chance.string() }
+            ];
+
+            // given mocks
+            var deleteStub = sandbox.stub(request, 'delete')
+                .withArgs(sinon.match(opts.object))
+                .yields(null, {
+                    statusCode: SUCCESS_CODE
+                });
+
+            // when
+            salesforceRest.deleteRecords(opts, records, err => {
+                expect(err).to.not.exist;
+                deleteStub.should.have.been.calledWith(sinon.match(records[0].id));
+                deleteStub.should.have.been.calledWith(sinon.match(records[1].Id));
+                done();
+            });
+        });
+
         it('should fail with message when non-204 response code', (done) => {
             // given data
             opts.object = chance.string();
