@@ -157,75 +157,104 @@ describe('salesforce-bulk-api:unit', () => {
     describe('#createBatch(opts, cb)', () => {
         beforeEach(() => {
             opts.jobId = chance.string();
-            opts.data = chance.n(chance.integer, 2);
         });
 
-        it('should create JSON batch and return batch info', (done) => {
-            // given data
-            var expectedBatchInfo = { id: chance.string() };
-
-            // given mocks
-            sandbox.stub(request, 'post').withArgs(sinon.match.string, sinon.match({
-                body: opts.data
-            })).yields(null, {
-                statusCode: 201
-            }, expectedBatchInfo);
-
-            // when
-            salesforceBulk.createBatch(opts, (err, batchInfo) => {
-                batchInfo.should.equal(expectedBatchInfo);
-                done();
+        context('JSON', () => {
+            beforeEach(() => {
+                opts.data = chance.n(chance.integer, 2);
             });
-        });
 
-        it('should create CSV batch and return batch info', (done) => {
-            // given data
-            var batchId = chance.string();
-            var expectedBatchInfo = { id: batchId };
-            var csvFile = `${chance.word()}.csv`;
-            opts.file = csvFile;
-            opts.data = undefined;
+            it('should create JSON batch and return batch info', (done) => {
+                // given data
+                var expectedBatchInfo = { id: chance.string() };
 
-            var read = new Readable();
-            read.push(chance.string());
-            read.push(null);
-
-            // given mocks
-            sandbox.stub(fs, 'createReadStream')
-                .withArgs(csvFile)
-                .returns(read);
-
-            sandbox.stub(request, 'post')
-                .withArgs(sinon.match.string, sinon.match({
-                    body: read
-                }))
-                .yields(null, {
+                // given mocks
+                sandbox.stub(request, 'post').withArgs(sinon.match.string, sinon.match({
+                    body: opts.data
+                })).yields(null, {
                     statusCode: 201
-                }, `<id>${batchId}</id>`);
+                }, expectedBatchInfo);
 
-            // when
-            salesforceBulk.createBatch(opts, (err, batchInfo) => {
-                batchInfo.should.deep.equal(expectedBatchInfo);
-                done();
+                // when
+                salesforceBulk.createBatch(opts, (err, batchInfo) => {
+                    batchInfo.should.equal(expectedBatchInfo);
+                    done();
+                });
+            });
+
+            it('should fail with error message when non-201 status code', (done) => {
+                checkInvalidStatusCode({
+                    action: 'create batch',
+                    process: cb => {
+                        salesforceBulk.createBatch(opts, cb);
+                    }
+                }, done);
+            });
+
+            it('should fail with error message when unexpected request error', (done) => {
+                checkUnexpectedException({
+                    action: 'create batch',
+                    process: cb => {
+                        salesforceBulk.createBatch(opts, cb);
+                    }
+                }, done);
             });
         });
 
-        it('should fail with error message when non-201 status code', (done) => {
-            checkInvalidStatusCode({
-                action: 'create JSON batch',
-                process: cb => {
-                    salesforceBulk.createBatch(opts, cb);
-                }
-            }, done);
-        });
+        context('CSV', () => {
+            var csvFile;
 
-        it('should fail with error message when unexpected request error', (done) => {
-            checkUnexpectedException({
-                action: 'create JSON batch',
-                process: cb => {
-                    salesforceBulk.createBatch(opts, cb);
-                }
-            }, done);
+            beforeEach(() => {
+                csvFile = `${chance.word()}.csv`;
+                opts.file = csvFile;
+            });
+
+            it('should create CSV batch and return batch info', (done) => {
+                // given data
+                var batchId = chance.word();
+                var expectedBatchInfo = { id: batchId };
+
+                var read = new Readable();
+                read.push(chance.string());
+                read.push(null);
+
+                // given mocks
+                sandbox.stub(fs, 'createReadStream')
+                    .withArgs(csvFile)
+                    .returns(read);
+
+                sandbox.stub(request, 'post')
+                    .withArgs(sinon.match.string, sinon.match({
+                        body: read
+                    }))
+                    .yields(null, {
+                        statusCode: 201
+                    }, `<batchInfo><id>${batchId}</id></batchInfo>`);
+
+                // when
+                salesforceBulk.createBatch(opts, (err, batchInfo) => {
+                    batchInfo.should.deep.equal(expectedBatchInfo);
+                    done();
+                });
+            });
+
+            it('should fail with error message when non-201 status code', (done) => {
+                checkInvalidStatusCode({
+                    action: 'create batch',
+                    process: cb => {
+                        salesforceBulk.createBatch(opts, cb);
+                    }
+                }, done);
+            });
+
+            it('should fail with error message when unexpected request error', (done) => {
+                checkUnexpectedException({
+                    action: 'create batch',
+                    process: cb => {
+                        salesforceBulk.createBatch(opts, cb);
+                    }
+                }, done);
+            });
         });
     });
 
@@ -366,7 +395,7 @@ describe('salesforce-bulk-api:unit', () => {
             // when
             salesforceBulk.getBatchResult(opts, (err, result) => {
                 err.should.equal(`Failed to get batch result due to unexpected error: Failed to get job details due to unexpected error: ${exception}`);
-                done();                
+                done();
             });
         });
 

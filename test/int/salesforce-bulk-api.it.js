@@ -80,7 +80,7 @@ describe('salesforce-bulk-api:integration', () => {
             });
         });
 
-        it.only('create and complete CSV batch', (done) => {
+        it('create and complete CSV batch', (done) => {
             salesforceLogin.usernamePassword({}, (err, auth) => {
                 var opts = {
                     auth,
