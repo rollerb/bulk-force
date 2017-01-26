@@ -1,8 +1,10 @@
 const bulk = require('../../lib/bulk-force');
 const chance = require('chance').Chance();
 const expect = require('chai').expect;
+const loginApi = require('../../lib/salesforce-login-api');
+const restApi = require('../../lib/salesforce-rest-api');
 
-describe.only('bulk-force', () => {
+describe('bulk-force', () => {
     it('#loadData(opts, data, cb) with JSON', (done) => {
         chance.mixin({
             'account': () => {
@@ -14,13 +16,22 @@ describe.only('bulk-force', () => {
         });
         var data = chance.n(chance.account, 2);
 
-        bulk.loadData({
-            action: 'insert',
-            object: 'Account'
-        }, data, (err, results) => {
-            expect(err).to.not.exist;
-            expect(results).to.have.lengthOf(2);
-            done();
+        loginApi.usernamePassword({}, (err, auth) => {
+            var opts = {
+                auth,
+                action: 'insert',
+                object: 'Account'
+            };
+
+            bulk.loadData(opts, data, (err, results) => {
+                expect(err).to.not.exist;
+                expect(results).to.have.lengthOf(2);
+
+                restApi.deleteRecords(opts, results, err => {
+                    expect(err).to.not.exist;
+                    done();
+                });
+            });
         });
     });
 });

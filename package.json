@@ -21,9 +21,9 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "mocha test/* --timeout 10000",
+    "test": "mocha test/* --timeout 20000",
     "unit": "mocha test/unit",
-    "int": "DEBUG=bulk-force:* mocha test/int --timeout 10000"
+    "int": "DEBUG=bulk-force:* mocha test/int --timeout 20000"
   },
   "keywords": [
     "Salesforce"

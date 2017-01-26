@@ -385,6 +385,8 @@ describe('salesforce-bulk-api:unit', () => {
             });
         });
 
+        it('should split success and errors in result');
+
         it('should fail when unexpected error occurs while getting job info', (done) => {
             // given data
             var exception = chance.word();
