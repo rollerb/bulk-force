@@ -430,7 +430,29 @@ describe('salesforce-bulk-api:unit', () => {
             });
         });
 
-        it('should fail getting batch results with error message when fails to build result');
+        it('should fail getting batch results with error message when fails to build result', done => {
+            // given data
+            var expectedError = chance.string();
+
+            // given mocks
+            var getStub = sandbox.stub(request, 'get');
+
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/request$`))).yields(null, {
+                statusCode: 200
+            }, chance.word());
+
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/result$`))).yields(null, {
+                statusCode: 200
+            }, chance.word());
+
+            sandbox.stub(resultBuilder, 'build').yields(expectedError);
+
+            // when
+            salesforceBulk.getBatchResult(opts, err => {
+                err.should.equal(`Failed to get batch result due to unexpected error: ${expectedError}`);
+                done();
+            });            
+        });
     });
 
     function checkInvalidStatusCode(opts, done) {

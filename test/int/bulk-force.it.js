@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const loginApi = require('../../lib/salesforce-login-api');
 const restApi = require('../../lib/salesforce-rest-api');
 
-describe('bulk-force', () => {
+describe.only('bulk-force', () => {
     it('#loadData(opts, data, cb) with JSON', (done) => {
         chance.mixin({
             'account': () => {
@@ -23,11 +23,11 @@ describe('bulk-force', () => {
                 object: 'Account'
             };
 
-            bulk.loadData(opts, data, (err, results) => {
+            bulk.loadData(opts, data, (err, result) => {
                 expect(err).to.not.exist;
-                expect(results.success).to.have.lengthOf(2);
-
-                restApi.deleteRecords(opts, results.success, err => {
+                expect(result.success).to.have.lengthOf(2);
+                
+                restApi.deleteRecords(opts, result.success, err => {
                     expect(err).to.not.exist;
                     done();
                 });
