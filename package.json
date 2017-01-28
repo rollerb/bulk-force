@@ -1,6 +1,6 @@
 {
   "name": "bulk-force",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "API to bulk load data into Salesforce.",
   "main": "./lib/bulk-force.js",
   "directories": {
