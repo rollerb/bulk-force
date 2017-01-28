@@ -1,10 +1,15 @@
 {
   "name": "bulk-force",
   "version": "0.1.0",
-  "description": "Module to bulk load data to Salesforce.",
-  "main": "index.js",
+  "description": "API to bulk load data into Salesforce.",
+  "main": "./lib/bulk-force.js",
   "directories": {
+    "lib": "lib",
     "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rollerb/bulk-force.git"
   },
   "dependencies": {
     "async": "^2.1.4",
