@@ -98,7 +98,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
         });
     });
 
-    it('should detect CSV if data is a file location', done => {
+    it('should be CSV content type if data is a string', done => {
         // given data
         var file = chance.word();
 
