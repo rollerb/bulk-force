@@ -6,6 +6,7 @@ const chance = require('chance').Chance();
 const salesforceBulk = require('../../lib/salesforce-bulk-api');
 const fs = require('fs');
 const Readable = require('stream').Readable;
+const resultBuilder = require('../../lib/bulk-result-builder');
 
 chai.should();
 chai.use(sinonChai);
@@ -336,21 +337,26 @@ describe('salesforce-bulk-api:unit', () => {
             opts.batchId = chance.word();
         });
 
-        it('should get JSON batch result', done => {
+        it('should get batch result', done => {
             // given data
-            var expectedResult = [{ id: chance.string() }];
+            var bulkRequest = chance.word();
+            var bulkResponse = chance.word();
+            var expectedResult = chance.word();
 
             // given mocks
             var getStub = sandbox.stub(request, 'get');
-            getStub.withArgs(sinon.match(new RegExp(`\/${opts.jobId}$`))).yields(null, {
-                statusCode: 200
-            }, {
-                    contentType: 'JSON'
-                });
 
-            getStub.withArgs(sinon.match(opts.batchId)).yields(null, {
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/request$`))).yields(null, {
                 statusCode: 200
-            }, expectedResult);
+            }, bulkRequest);
+
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/result$`))).yields(null, {
+                statusCode: 200
+            }, bulkResponse);
+
+            sandbox.stub(resultBuilder, 'build')
+                .withArgs(bulkRequest, bulkResponse)
+                .yields(null, expectedResult);
 
             // when
             salesforceBulk.getBatchResult(opts, (err, result) => {
@@ -359,65 +365,27 @@ describe('salesforce-bulk-api:unit', () => {
             });
         });
 
-        it('should get CSV batch result', done => {
+        it('should fail getting batch results with error message when error getting batch request', (done) => {
             // given data
-            var row1val1 = chance.string();
-            var row1val2 = chance.string();
-            var csvResponse = `id,value\n${row1val1},${row1val2}`;
-            var expectedJsonResult = [{ id: row1val1, value: row1val2 }];
+            var expectedError = chance.string();
 
             // given mocks
             var getStub = sandbox.stub(request, 'get');
-            getStub.withArgs(sinon.match(new RegExp(`\/${opts.jobId}$`))).yields(null, {
-                statusCode: 200
-            }, {
-                    contentType: 'CSV'
-                });
 
-            getStub.withArgs(sinon.match(opts.batchId)).yields(null, {
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/request$`))).yields(expectedError);
+
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/result$`))).yields(null, {
                 statusCode: 200
-            }, csvResponse);
+            }, chance.word());
 
             // when
-            salesforceBulk.getBatchResult(opts, (err, result) => {
-                result.should.deep.equal(expectedJsonResult);
+            salesforceBulk.getBatchResult(opts, err => {
+                err.should.equal(`Failed to get batch result due to unexpected error: Failed to get batch request due to unexpected error: ${expectedError}`);
                 done();
             });
         });
 
-        it('should split success and errors in result');
-
-        it('should fail when unexpected error occurs while getting job info', (done) => {
-            // given data
-            var exception = chance.word();
-
-            // given mocks
-            sandbox.stub(request, 'get').withArgs(sinon.match(new RegExp(`\/${opts.jobId}$`))).yields(exception);
-
-            // when
-            salesforceBulk.getBatchResult(opts, (err, result) => {
-                err.should.equal(`Failed to get batch result due to unexpected error: Failed to get job details due to unexpected error: ${exception}`);
-                done();
-            });
-        });
-
-        it('should fail getting JSON batch results with error message when non-200 status code', (done) => {
-            checkInvalidBatchResultStatusCode(opts, 'JSON', done);
-        });
-
-        it('should fail getting CSV batch results with error message when non-200 status code', (done) => {
-            checkInvalidBatchResultStatusCode(opts, 'CSV', done);
-        });
-
-        it('should fail getting JSON batch results with error message when unexpected request error', (done) => {
-            checkUnexpectedBatchResultException(opts, 'JSON', done);
-        });
-
-        it('should fail getting CSV batch results with error message when unexpected request error', (done) => {
-            checkUnexpectedBatchResultException(opts, 'CSV', done);
-        });
-
-        function checkInvalidBatchResultStatusCode(opts, contentType, done) {
+        it('should fail getting batch results with error message when non-200 status code', (done) => {
             // given data
             var expectedException = {
                 exceptionCode: chance.string(),
@@ -426,13 +394,12 @@ describe('salesforce-bulk-api:unit', () => {
 
             // given mocks
             var getStub = sandbox.stub(request, 'get');
-            getStub.withArgs(sinon.match(new RegExp(`\/${opts.jobId}$`))).yields(null, {
-                statusCode: 200
-            }, {
-                    contentType
-                });
 
-            getStub.withArgs(sinon.match(opts.batchId)).yields(null, {
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/request$`))).yields(null, {
+                statusCode: 200
+            }, chance.word());
+
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/result$`))).yields(null, {
                 statusCode: 500
             }, expectedException);
 
@@ -441,28 +408,29 @@ describe('salesforce-bulk-api:unit', () => {
                 err.should.equal(`Failed to get batch result. Error received: ${expectedException.exceptionCode}; ${expectedException.exceptionMessage}`);
                 done();
             });
-        }
+        });
 
-        function checkUnexpectedBatchResultException(opts, contentType, done) {
+        it('should fail getting batch results with error message when unexpected request error', (done) => {
             // given data
             var expectedError = chance.string();
 
             // given mocks
             var getStub = sandbox.stub(request, 'get');
-            getStub.withArgs(sinon.match(new RegExp(`\/${opts.jobId}$`))).yields(null, {
-                statusCode: 200
-            }, {
-                    contentType
-                });
 
-            getStub.withArgs(sinon.match(opts.batchId)).yields(expectedError);
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/request$`))).yields(null, {
+                statusCode: 200
+            }, chance.word());
+
+            getStub.withArgs(sinon.match(new RegExp(`\/${opts.batchId}/result$`))).yields(expectedError);
 
             // when
             salesforceBulk.getBatchResult(opts, err => {
                 err.should.equal(`Failed to get batch result due to unexpected error: ${expectedError}`);
                 done();
             });
-        }
+        });
+
+        it('should fail getting batch results with error message when fails to build result');
     });
 
     function checkInvalidStatusCode(opts, done) {

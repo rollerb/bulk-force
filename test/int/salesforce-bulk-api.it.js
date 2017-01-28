@@ -63,12 +63,12 @@ describe('salesforce-bulk-api:integration', () => {
                             batchInfo.state.should.equal('Completed');
 
                             salesforceBulk.getBatchResult(opts, (err, result) => {
-                                result.should.be.an.instanceof(Array);
+                                result.success.should.have.lengthOf(2);
 
                                 salesforceBulk.closeJob(auth, jobInfo.id, err => {
                                     opts.object = 'Account';
 
-                                    salesforceRest.deleteRecords(opts, result, err => {
+                                    salesforceRest.deleteRecords(opts, result.success, err => {
                                         expect(err).to.not.exist;
                                         done();
                                     });
@@ -109,12 +109,12 @@ describe('salesforce-bulk-api:integration', () => {
                             batchInfo.state.should.equal('Completed');
 
                             salesforceBulk.getBatchResult(opts, (err, result) => {
-                                result.should.be.an.instanceof(Array);
+                                result.success.should.have.lengthOf(2);
 
                                 salesforceBulk.closeJob(auth, jobInfo.id, err => {
                                     opts.object = 'Account';
 
-                                    salesforceRest.deleteRecords(opts, result, err => {
+                                    salesforceRest.deleteRecords(opts, result.success, err => {
                                         expect(err).to.not.exist;
                                         done();
                                     });

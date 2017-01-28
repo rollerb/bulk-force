@@ -25,9 +25,9 @@ describe('bulk-force', () => {
 
             bulk.loadData(opts, data, (err, results) => {
                 expect(err).to.not.exist;
-                expect(results).to.have.lengthOf(2);
+                expect(results.success).to.have.lengthOf(2);
 
-                restApi.deleteRecords(opts, results, err => {
+                restApi.deleteRecords(opts, results.success, err => {
                     expect(err).to.not.exist;
                     done();
                 });
