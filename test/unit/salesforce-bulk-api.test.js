@@ -33,6 +33,7 @@ describe('salesforce-bulk-api:unit', () => {
             opts.operation = chance.word();
             opts.object = chance.word();
             opts.contentType = chance.word();
+            opts.externalIdFieldName = chance.word();
         });
 
         it('should create job and return job info', (done) => {
@@ -44,7 +45,8 @@ describe('salesforce-bulk-api:unit', () => {
                 body: {
                     operation: opts.operation,
                     object: opts.object,
-                    contentType: opts.contentType
+                    contentType: opts.contentType,
+                    externalIdFieldName: opts.externalIdFieldName
                 }
             })).yields(null, {
                 statusCode: 201

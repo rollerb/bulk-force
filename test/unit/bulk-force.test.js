@@ -43,6 +43,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
         opts = {
             action: chance.word(),
             object: chance.word(),
+            externalField: chance.word(),
             auth
         };
 
@@ -52,6 +53,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
             .withArgs(sinon.match({
                 operation: opts.action,
                 object: opts.object,
+                externalIdFieldName: opts.externalField,
                 contentType: 'JSON'
             })
             ).yields(null, jobInfo);
@@ -132,4 +134,12 @@ describe('bulk force#loadData(opts, data, cb)', () => {
     it('should group data one level prior to splitting into batches');
     it('should group data with multiple levels prior to splitting into batches');
     it('should break into multiple jobs if grouped data exceeds batch limit');
+
+    context('errors', () => {
+        it('should fail with error message whne fails to create job');
+        it('should fail with error message whne fails to create batch');
+        it('should fail with error message whne fails to close job');
+        it('should fail with error message whne fails to complete batch');
+        it('should fail with error message whne fails to get batch result');
+    });
 });
