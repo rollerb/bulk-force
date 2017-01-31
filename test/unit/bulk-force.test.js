@@ -13,6 +13,15 @@ describe('bulk force#loadData(opts, data, cb)', () => {
     var auth;
     var opts;
 
+    chance.mixin({
+        'jobInfo': () => {
+            return { id: chance.word() };
+        },
+        'batchInfo': () => {
+            return { id: chance.word() };
+        }
+    });
+
     afterEach(() => {
         sandbox.restore();
     });
@@ -38,13 +47,8 @@ describe('bulk force#loadData(opts, data, cb)', () => {
         var batchInfo;
 
         beforeEach(() => {
-            jobInfo = {
-                id: chance.word()
-            };
-
-            batchInfo = {
-                id: chance.word()
-            };
+            jobInfo = chance.jobInfo();
+            batchInfo = chance.batchInfo();
 
             var jobBatchInfo = {
                 jobId: jobInfo.id,
@@ -83,9 +87,9 @@ describe('bulk force#loadData(opts, data, cb)', () => {
                 .withArgs(sinon.match(jobBatchInfo))
                 .yields(null, expectedResult);
 
-            sandbox.stub(batchSplitter, 'split').yields(null, [data]);      
+            sandbox.stub(batchSplitter, 'split').yields(null, [data]);
 
-            sandbox.stub(batchJoiner, 'join').returns(expectedResult);                      
+            sandbox.stub(batchJoiner, 'join').returns(expectedResult);
         });
 
         it('#loadData(opts, data, cb)', (done) => {
@@ -142,7 +146,6 @@ describe('bulk force#loadData(opts, data, cb)', () => {
     });
 
     context('single job, multiple batches', () => {
-
         it('should break up data into multiple batches if exceeds batch size', done => {
             // given data
             var oneData = chance.date();
@@ -230,10 +233,133 @@ describe('bulk force#loadData(opts, data, cb)', () => {
     it('should break into multiple jobs if grouped data exceeds batch limit');
 
     context('errors', () => {
-        it('should fail with error message whne fails to create job');
-        it('should fail with error message whne fails to create batch');
-        it('should fail with error message whne fails to close job');
-        it('should fail with error message whne fails to complete batch');
-        it('should fail with error message whne fails to get batch result');
+        var error;
+        var expectedError;
+
+        beforeEach(() => {
+            error = chance.word();
+            expectedError = 'Unable to load data due to failure to ';
+        });
+
+        it('should fail with error message when fails to split batches', done => {
+            // given data
+            expectedError += `split job into multiple batches: ${error}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(error);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });
+        });
+
+        it('should fail with error message when fails to create job', done => {
+            // given data
+            expectedError += `create job: ${error}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(null, []);
+            sandbox.stub(bulkApi, 'createJob').yields(error);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });
+        });
+
+        it('should fail with error message when fails to create batch', done => {
+            // given data
+            expectedError += `process batch: ${error}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+            sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+            sandbox.stub(bulkApi, 'closeJob').yields();
+            sandbox.stub(bulkApi, 'createBatch').yields(error);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });
+        });
+
+        it('should fail with error message when fails to complete batch', done => {
+            // given data
+            expectedError += `process batch: ${error}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+            sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+            sandbox.stub(bulkApi, 'createBatch').yields(null, chance.batchInfo());
+            sandbox.stub(bulkApi, 'closeJob').yields();
+            sandbox.stub(bulkApi, 'completeBatch').yields(error);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });
+        });
+
+        it('should fail with error message when fails to get batch result', done => {
+            // given data
+            expectedError += `process batch: ${error}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+            sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+            sandbox.stub(bulkApi, 'createBatch').yields(null, chance.batchInfo());
+            sandbox.stub(bulkApi, 'completeBatch').yields(null, chance.batchInfo());
+            sandbox.stub(bulkApi, 'closeJob').yields();
+            sandbox.stub(bulkApi, 'getBatchResult').yields(error);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });            
+        });
+
+        it('should fail with error message when fails to close job', done => {
+            // given data
+            expectedError = `Unable to close job: ${error}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+            sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+            sandbox.stub(bulkApi, 'createBatch').yields(null, chance.batchInfo());
+            sandbox.stub(bulkApi, 'completeBatch').yields(null, chance.batchInfo());
+            sandbox.stub(bulkApi, 'getBatchResult').yields(null, chance.word());
+            sandbox.stub(bulkApi, 'closeJob').yields(error);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });               
+        });
+
+        it('should fail with error message even when closing job also fails', done => {
+            // given data
+            var batchError = chance.word();
+            var closeJobError = chance.word();
+            var expectedError = `Unable to load data due to failure to process batch: ${batchError}; Unable to close job: ${closeJobError}`;
+
+            // given mocks
+            sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+            sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+            sandbox.stub(bulkApi, 'createBatch').yields(batchError);
+            sandbox.stub(bulkApi, 'closeJob').yields(closeJobError);
+
+            // when
+            bulk.loadData(opts, chance.word(), err => {
+                expect(err).to.equal(expectedError);
+                done();
+            });               
+        });        
     });
 });

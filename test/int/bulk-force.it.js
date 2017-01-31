@@ -20,7 +20,8 @@ describe.only('bulk-force', () => {
             var opts = {
                 auth,
                 action: 'insert',
-                object: 'Account'
+                object: 'Account',
+                maxBatchSize: 2
             };
 
             bulk.loadData(opts, data, (err, result) => {
