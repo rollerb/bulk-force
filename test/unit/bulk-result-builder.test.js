@@ -1,38 +1,3 @@
-/*
-  var resultRequest = [
-      {
-          Name: chance.word()
-      }, {
-          Name: chance.word()
-      }
-  ];
-
-  var resultResponse = [
-      {
-          succcess: true,
-          id: chance.word()
-      },
-      {
-          success: false,
-          id: null,
-          errors: [{
-              message: chance.word(),
-              statusCode: chance.word()
-          }]
-      }
-  ];
-
-  var expectedResult = {
-      success: [{
-          id: resultResponse[0].id,
-          Name: resultRequest[0].Name
-      }],
-      error: [{
-          error: resultResponse[1].errors[0].statusCode + resultResponse[1].errors[0].message,
-          Name: resultRequest[1].Name
-      }]
-  };
-  */
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
