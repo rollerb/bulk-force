@@ -92,7 +92,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
             sandbox.stub(batchJoiner, 'join').returns(expectedResult);
         });
 
-        it('#loadData(opts, data, cb)', (done) => {
+        it('should load JSON data', (done) => {
             // when
             bulk.loadData(opts, data, (err, result) => {
                 expect(result).to.equal(expectedResult);
@@ -114,26 +114,33 @@ describe('bulk force#loadData(opts, data, cb)', () => {
             });
         });
 
-        it('should be CSV content type if data is a string', done => {
+        it('should process CSV content and convert to JSON', done => {
             // given data
             var file = chance.word();
 
             // given mocks
             bulkApi.createJob.restore();
             bulkApi.createBatch.restore();
+            batchSplitter.split.restore();
+
+            sandbox.stub(batchSplitter, 'split')
+                .withArgs(sinon.match({
+                    contentType: 'CSV'
+                }), file)
+                .yields(null, [data]);
 
             sandbox.stub(bulkApi, 'createJob')
                 .withArgs(sinon.match({
                     operation: opts.action,
                     object: opts.object,
-                    contentType: 'CSV'
-                })
-                ).yields(null, jobInfo);
+                    contentType: 'JSON'
+                }))
+                .yields(null, jobInfo);
 
             sandbox.stub(bulkApi, 'createBatch')
                 .withArgs(sinon.match({
                     jobId: jobInfo.id,
-                    file: data
+                    data
                 }))
                 .yields(null, batchInfo);
 
@@ -321,7 +328,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
             bulk.loadData(opts, chance.word(), err => {
                 expect(err).to.equal(expectedError);
                 done();
-            });            
+            });
         });
 
         it('should fail with error message when fails to close job', done => {
@@ -340,7 +347,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
             bulk.loadData(opts, chance.word(), err => {
                 expect(err).to.equal(expectedError);
                 done();
-            });               
+            });
         });
 
         it('should fail with error message even when closing job also fails', done => {
@@ -359,7 +366,7 @@ describe('bulk force#loadData(opts, data, cb)', () => {
             bulk.loadData(opts, chance.word(), err => {
                 expect(err).to.equal(expectedError);
                 done();
-            });               
-        });        
+            });
+        });
     });
 });

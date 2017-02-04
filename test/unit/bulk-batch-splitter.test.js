@@ -9,7 +9,6 @@ describe('bulk-batch-splitter', () => {
     var sandbox = sinon.sandbox.create();
     var data;
     var expectedSplit;
-    // var batchSplitter;
 
     beforeEach(() => {
         data = chance.n(chance.date, 2);
