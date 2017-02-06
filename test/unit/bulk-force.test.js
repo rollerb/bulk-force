@@ -372,7 +372,7 @@ describe('bulk force', () => {
         });
     });
 
-    describe.only('#query(opts, soql, cb)', () => {
+    describe('#query(opts, soql, cb)', () => {
         var jobInfo;
         var batchInfo;
         var soql;
@@ -381,12 +381,11 @@ describe('bulk force', () => {
             jobInfo = chance.jobInfo();
             batchInfo = chance.batchInfo();
             soql = chance.word();
-        }); 
+        });
 
         it('should create batch query and return results', done => {
             // given data
             var object = chance.word();
-            var soql = chance.word();
             var auth = chance.date();
             var expectedResult = chance.n(chance.date, 2);
             var opts = { auth, object };
@@ -436,12 +435,123 @@ describe('bulk force', () => {
             sandbox.stub(bulkApi, 'createBatch').yields(null, batchInfo);
             sandbox.stub(bulkApi, 'closeJob').yields(null, jobInfo);
             sandbox.stub(bulkApi, 'completeBatch').yields(null, batchInfo);
-            sandbox.stub(bulkApi, 'getBatchResult').yields(null, expectedResult);                
+            sandbox.stub(bulkApi, 'getBatchResult').yields(null, expectedResult);
 
             // when
             bulk.query(opts, soql, (err, result) => {
                 expect(result).to.equal(expectedResult);
                 done();
+            });
+        });
+
+        context('errors', () => {
+            var errror;
+
+            beforeEach(() => {
+                error = chance.word();
+            });
+
+            it('should fail with error message when fails to create job', done => {
+                // given data
+                var expectedError = `Unable to query data due to failure to create job: ${error}`;
+
+                // given mocks
+                sandbox.stub(bulkApi, 'createJob').yields(error);
+
+                // when
+                bulk.query(opts, soql, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                });
+            });
+
+            it('should fail with error message when fails to create batch', done => {
+                // given data
+                var expectedError = `Unable to query data due to failure to process batch: ${error}`;
+
+                // given mocks
+                sandbox.stub(bulkApi, 'createJob').yields(null, jobInfo);
+                sandbox.stub(bulkApi, 'createBatch').yields(error);
+                sandbox.stub(bulkApi, 'closeJob').yields();
+
+                // when
+                bulk.query(opts, soql, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                });
+            });
+
+            it('should fail with error message when fails to complete batch', done => {
+                // given data
+                var expectedError = `Unable to query data due to failure to process batch: ${error}`;
+
+                // given mocks
+                sandbox.stub(bulkApi, 'createJob').yields(null, jobInfo);
+                sandbox.stub(bulkApi, 'createBatch').yields(null, batchInfo);
+                sandbox.stub(bulkApi, 'completeBatch').yields(error);
+                sandbox.stub(bulkApi, 'closeJob').yields();
+
+                // when
+                bulk.query(opts, soql, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                });
+            });
+
+            it('should fail with error message when fails to get batch result', done => {
+                // given data
+                var expectedError = `Unable to query data due to failure to process batch: ${error}`;
+
+                // given mocks
+                sandbox.stub(bulkApi, 'createJob').yields(null, jobInfo);
+                sandbox.stub(bulkApi, 'createBatch').yields(null, batchInfo);
+                sandbox.stub(bulkApi, 'completeBatch').yields(null, batchInfo);
+                sandbox.stub(bulkApi, 'getBatchResult').yields(error);
+                sandbox.stub(bulkApi, 'closeJob').yields();
+
+                // when
+                bulk.query(opts, soql, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                });
+            });
+
+            it('should fail with error message when fails to get close job', done => {
+                // given data
+                var expectedError = `Unable to close job: ${error}`;
+                var expectedResult = chance.word();
+
+                // given mocks
+                sandbox.stub(bulkApi, 'createJob').yields(null, jobInfo);
+                sandbox.stub(bulkApi, 'createBatch').yields(null, batchInfo);
+                sandbox.stub(bulkApi, 'completeBatch').yields(null, batchInfo);
+                sandbox.stub(bulkApi, 'getBatchResult').yields(null, expectedResult);
+                sandbox.stub(bulkApi, 'closeJob').yields(error);
+
+                // when
+                bulk.query(opts, soql, (err, result) => {
+                    expect(err).to.equal(expectedError);
+                    expect(result).to.equal(expectedResult);
+                    done();
+                });
+            });
+
+            it('should fail with error message even when closing job also fails', done => {
+                // given data
+                var createBatchError = chance.word();
+                var closeJobError = chance.word();
+                var expectedError = `Unable to query data due to failure to process batch: ${createBatchError}; Unable to close job: ${closeJobError}`;
+
+                // given mocks
+                sandbox.stub(bulkApi, 'createJob').yields(null, jobInfo);
+                sandbox.stub(bulkApi, 'createBatch').yields(createBatchError);
+                sandbox.stub(bulkApi, 'closeJob').yields(closeJobError);
+
+                // when
+                bulk.query(opts, soql, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                });
             });
         });
     });
