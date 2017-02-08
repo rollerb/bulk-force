@@ -6,6 +6,8 @@ const bulkApi = require('../../lib/salesforce-bulk-api');
 const loginApi = require('../../lib/salesforce-login-api');
 const batchSplitter = require('../../lib/bulk-batch-splitter');
 const batchJoiner = require('../../lib/bulk-batch-result-joiner');
+const proxyquire = require('proxyquire');
+const fs = require('fs');
 
 describe('bulk force', () => {
     const sandbox = sinon.sandbox.create();
@@ -412,6 +414,40 @@ describe('bulk force', () => {
             // when
             bulk.query(opts, soql, (err, actualResult) => {
                 expect(actualResult).to.equal(expectedResult);
+                done();
+            });
+        });
+
+        it('should save batch query result to file', done => {
+            // given data
+            var toFile = chance.word();
+            var data = chance.n(chance.date, 2);
+            var csv = chance.string();
+            var expectedResult = { recordCount: data.length };
+
+            opts.toFile = toFile;
+
+            // given mocks
+            sandbox.stub(bulkApi, 'createJob').yields(null, jobInfo);
+            sandbox.stub(bulkApi, 'createBatch').yields(null, batchInfo);
+            sandbox.stub(bulkApi, 'completeBatch').yields(null, batchInfo);
+            sandbox.stub(bulkApi, 'closeJob').yields(null, jobInfo);
+            sandbox.stub(bulkApi, 'getBatchResult').yields(null, data);
+
+            var csvStub = sandbox.stub();
+            csvStub.withArgs(sinon.match({
+                data
+            })).returns(csv);
+
+            sandbox.stub(fs, 'writeFile').withArgs(toFile, csv).yields();
+
+            var bulk = proxyquire('../../lib/bulk-force', {
+                json2csv: csvStub
+            });
+
+            // when
+            bulk.query(opts, soql, (err, actualResult) => {
+                expect(actualResult).to.deep.equal(expectedResult);
                 done();
             });
         });

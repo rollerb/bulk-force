@@ -52,7 +52,7 @@ describe.only('bulk-force', () => {
         });        
     });
 
-    it.only('extract data by SOQL', done => {
+    it('extract data by SOQL', done => {
         var opts = {
             object: 'Account'
         };
@@ -61,6 +61,20 @@ describe.only('bulk-force', () => {
         bulk.query(opts, soql, (err, result) => {
             expect(err).to.not.exist;
             expect(result.length).to.be.at.least(1);
+            done();          
+        });
+    });
+
+    it.only('extract data by SOQL to file', done => {
+        var opts = {
+            object: 'Account',
+            toFile: `${process.cwd()}/test/int/data/out-test.csv`
+        };
+        var soql = 'Select Id, Name from Account';
+
+        bulk.query(opts, soql, (err, result) => {
+            expect(err).to.not.exist;
+            expect(result.recordCount).to.be.at.least(1);
             done();          
         });
     });
