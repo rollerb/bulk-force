@@ -3,3 +3,4 @@ node_modules
 npm-debug.log
 *_success.csv
 *_error.csv
+*-test.csv
