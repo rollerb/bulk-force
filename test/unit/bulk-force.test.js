@@ -153,6 +153,87 @@ describe('bulk force', () => {
                     done();
                 });
             });
+
+            it('should save result to path', done => {
+                // given data
+                opts.toPath = chance.word();
+                var joinedResults = {
+                    success: chance.n(chance.word, 2),
+                    error: chance.n(chance.word, 3)
+                };
+                var expectedResult = {
+                    successCount: 2,
+                    errorCount: 3
+                };
+                var successCsv = chance.word();
+                var errorCsv = chance.word();
+
+                // given mocks
+                batchJoiner.joinInputResults.restore();
+                sandbox.stub(batchJoiner, 'joinInputResults').returns(joinedResults);
+
+                var csvStub = sandbox.stub();
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.success
+                })).returns(successCsv);
+
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.error
+                })).returns(errorCsv);
+
+                var writeStub = sandbox.stub(fs, 'writeFile');
+                writeStub.withArgs(sinon.match(opts.toPath), successCsv).yields();
+                writeStub.withArgs(sinon.match(opts.toPath), errorCsv).yields();
+
+                var bulk = proxyquire('../../lib/bulk-force', {
+                    json2csv: csvStub
+                });
+
+                // when
+                bulk.load(opts, data, (err, actualResult) => {
+                    expect(actualResult).to.deep.equal(expectedResult);
+                    sinon.assert.calledTwice(writeStub);
+                    done();
+                })
+            });
+
+            it('should not save no results to path', done => {
+                // given data
+                opts.toPath = chance.word();
+                var joinedResults = {
+                    success: chance.n(chance.word, 2),
+                    error: []
+                };
+                var expectedResult = {
+                    successCount: 2,
+                    errorCount: 0
+                };
+                var successCsv = chance.word();
+                var errorCsv = chance.word();
+
+                // given mocks
+                batchJoiner.joinInputResults.restore();
+                sandbox.stub(batchJoiner, 'joinInputResults').returns(joinedResults);
+
+                var csvStub = sandbox.stub();
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.success
+                })).returns(successCsv);
+
+                var writeStub = sandbox.stub(fs, 'writeFile');
+                writeStub.withArgs(sinon.match(opts.toPath), successCsv).yields();
+
+                var bulk = proxyquire('../../lib/bulk-force', {
+                    json2csv: csvStub
+                });
+
+                // when
+                bulk.load(opts, data, (err, actualResult) => {
+                    expect(actualResult).to.deep.equal(expectedResult);
+                    sinon.assert.calledOnce(writeStub);
+                    done();
+                })
+            });
         });
 
         context('single job, multiple batches', () => {
