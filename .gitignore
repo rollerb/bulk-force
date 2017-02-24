@@ -5,3 +5,4 @@ npm-debug.log
 *_error.csv
 *-test.csv
 coverage
+.vscode
