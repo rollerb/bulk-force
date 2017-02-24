@@ -25,13 +25,15 @@
     "chai": "^3.5.0",
     "chance": "^1.0.4",
     "proxyquire": "^1.7.11",
+    "rewire": "^2.5.2",
     "sinon": "^1.17.7",
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "test": "mocha test/* --timeout 60000",
     "unit": "mocha test/unit",
-    "int": "DEBUG=bulk-force:* mocha test/int --timeout 60000"
+    "int": "DEBUG=bulk-force:* mocha test/int --timeout 60000",
+    "coverage": "istanbul cover _mocha -- test/unit && open coverage/lcov-report/index.html"
   },
   "keywords": [
     "salesforce",

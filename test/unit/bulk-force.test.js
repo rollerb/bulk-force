@@ -233,7 +233,7 @@ describe('bulk force', () => {
                     sinon.assert.calledOnce(writeStub);
                     done();
                 })
-            });
+            });         
         });
 
         context('single job, multiple batches', () => {
@@ -438,7 +438,7 @@ describe('bulk force', () => {
                 // given data
                 var batchError = chance.word();
                 var closeJobError = chance.word();
-                var expectedError = `Unable to load data due to failure to process batch: ${batchError}; Unable to close job: ${closeJobError}`;
+                expectedError += `process batch: ${batchError}; Unable to close job: ${closeJobError}`;
 
                 // given mocks
                 sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
@@ -452,6 +452,106 @@ describe('bulk force', () => {
                     done();
                 });
             });
+
+            it('should fail with error message when unable to save success result to path', done => {
+                // given data
+                opts.toPath = chance.word();
+
+                var data = chance.n(chance.word, 2);
+                var joinedResults = {
+                    success: chance.n(chance.word, 2),
+                    error: chance.n(chance.word, 3)
+                };
+                var expectedResult = {
+                    successCount: 2,
+                    errorCount: 3
+                };
+                var successCsv = chance.word();
+                var errorCsv = chance.word();
+                var expectedError = `Unable to save success file: ${error}`;
+
+                // given mocks
+                sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+                sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+                sandbox.stub(bulkApi, 'createBatch').yields(null, chance.batchInfo());
+                sandbox.stub(bulkApi, 'completeBatch').yields(null, chance.batchInfo());
+                sandbox.stub(bulkApi, 'getBatchResult').yields(null, chance.word());                
+                sandbox.stub(bulkApi, 'closeJob').yields();                
+                sandbox.stub(batchJoiner, 'joinInputResults').returns(joinedResults);
+
+                var csvStub = sandbox.stub();
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.success
+                })).returns(successCsv);
+
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.error
+                })).returns(errorCsv);
+
+                var writeStub = sandbox.stub(fs, 'writeFile');
+                writeStub.withArgs(sinon.match(opts.toPath), successCsv).yields(error);
+                writeStub.withArgs(sinon.match(opts.toPath), errorCsv).yields();
+
+                var bulk = proxyquire('../../lib/bulk-force', {
+                    json2csv: csvStub
+                });
+
+                // when
+                bulk.load(opts, data, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                })
+            });     
+
+            it('should fail with error message when unable to save success result to path', done => {
+                // given data
+                opts.toPath = chance.word();
+
+                var data = chance.n(chance.word, 2);
+                var joinedResults = {
+                    success: chance.n(chance.word, 2),
+                    error: chance.n(chance.word, 3)
+                };
+                var expectedResult = {
+                    successCount: 2,
+                    errorCount: 3
+                };
+                var successCsv = chance.word();
+                var errorCsv = chance.word();
+                var expectedError = `Unable to save error file: ${error}`;
+
+                // given mocks
+                sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+                sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());
+                sandbox.stub(bulkApi, 'createBatch').yields(null, chance.batchInfo());
+                sandbox.stub(bulkApi, 'completeBatch').yields(null, chance.batchInfo());
+                sandbox.stub(bulkApi, 'getBatchResult').yields(null, chance.word());                
+                sandbox.stub(bulkApi, 'closeJob').yields();                
+                sandbox.stub(batchJoiner, 'joinInputResults').returns(joinedResults);
+
+                var csvStub = sandbox.stub();
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.success
+                })).returns(successCsv);
+
+                csvStub.withArgs(sinon.match({
+                    data: joinedResults.error
+                })).returns(errorCsv);
+
+                var writeStub = sandbox.stub(fs, 'writeFile');
+                writeStub.withArgs(sinon.match(opts.toPath), successCsv).yields();
+                writeStub.withArgs(sinon.match(opts.toPath), errorCsv).yields(error);
+
+                var bulk = proxyquire('../../lib/bulk-force', {
+                    json2csv: csvStub
+                });
+
+                // when
+                bulk.load(opts, data, err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                })
+            });                           
         });
     });
 

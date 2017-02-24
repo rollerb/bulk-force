@@ -3,13 +3,15 @@ const sinon = require('sinon');
 const sinonChai = require('sinon-chai')
 const request = require('request');
 const chance = require('chance').Chance();
-const salesforceBulk = require('../../lib/salesforce-bulk-api');
+const rewire = require('rewire');
+const salesforceBulk = rewire('../../lib/salesforce-bulk-api');
 const fs = require('fs');
 const Readable = require('stream').Readable;
 const resultBuilder = require('../../lib/bulk-result-builder');
 const xml2js = require('xml2js');
 const proxyquire = require('proxyquire');
 const resultJoiner = require('../../lib/bulk-batch-result-joiner');
+const expect = chai.expect;
 
 chai.should();
 chai.use(sinonChai);
@@ -356,6 +358,26 @@ describe('salesforce-bulk-api:unit', () => {
             // when
             salesforceBulk.completeBatch(opts, (err, batchInfo) => {
                 batchInfo.should.deep.equal(expectedBatchInfo);
+                done();
+            });
+        });
+
+        it('should default polling frequency if none provided', done => {
+            // given data
+            var expectedBatchInfo = { id: chance.string(), state: 'Completed' };
+
+            opts.frequency = undefined;
+            salesforceBulk.__set__('DEFAULT_FREQUENCY', 10);
+
+            // given mocks
+            var requestStub = sandbox.stub(request, 'get');
+            requestStub.yields(null, {
+                statusCode: 200
+            }, expectedBatchInfo);
+
+            // when
+            salesforceBulk.completeBatch(opts, err => {
+                expect(err).to.not.exist;
                 done();
             });
         });
