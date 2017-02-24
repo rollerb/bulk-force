@@ -53,26 +53,27 @@ describe.only('bulk-force', () => {
         });
     });
 
-    it.skip('load data using mapping file', done => {
+    it('load data using mapping file', done => {
         var mapFile = `${process.cwd()}/test/int/data/map.properties`
         var account = {
             customFieldName: chance.word(),
-            Site: chance.word()
+            YearStarted: '1234'
         };
         var opts = {
             object: 'Account',
             action: 'insert',
-            mapping: mapFile
+            mapFile
         };
 
         bulk.load(opts, [account], (err, result) => {
             expect(err).to.not.exist;
             expect(result.success).to.have.lengthOf(1);
             expect(result.error).to.have.lengthOf(0);
+            done();
         });
     });
 
-    it.only('load data and save results to disk', done => {
+    it('load data and save results to disk', done => {
         var opts = {
             action: 'insert',
             object: 'Account',

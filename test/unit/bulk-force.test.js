@@ -7,6 +7,7 @@ const loginApi = require('../../lib/salesforce-login-api');
 const batchSplitter = require('../../lib/bulk-batch-splitter');
 const batchJoiner = require('../../lib/bulk-batch-result-joiner');
 const proxyquire = require('proxyquire');
+const dataMapper = require('../../lib/bulk-data-mapper');
 const fs = require('fs');
 
 describe('bulk force', () => {
@@ -234,6 +235,29 @@ describe('bulk force', () => {
                     done();
                 })
             });         
+
+            it('should map data from file before creating batch', done => {
+                // given data
+                var mappedData = chance.word();
+                opts.mapFile = chance.word();
+
+                // given mocks
+                sandbox.stub(dataMapper, 'map').returns(mappedData);
+
+                bulkApi.createBatch.restore();
+                sandbox.stub(bulkApi, 'createBatch')
+                    .withArgs(sinon.match({
+                        jobId: jobInfo.id,
+                        data: mappedData
+                    }))
+                    .yields(null, batchInfo);                
+
+                // when
+                bulk.load(opts, data, (err, result) => {
+                    expect(result).to.equal(expectedResult);
+                    done();
+                });
+            });            
         });
 
         context('single job, multiple batches', () => {
@@ -551,7 +575,25 @@ describe('bulk force', () => {
                     expect(err).to.equal(expectedError);
                     done();
                 })
-            });                           
+            });         
+
+            it('should fail with error message when unable to parse mapping file', done => {
+                // given data
+                var expectedError = `Unable to load data due to failure to process batch: Unable to load data due to failure to process mapping file: ${error}`;
+                opts.mapFile = chance.word();                
+
+                // given mocks
+                sandbox.stub(batchSplitter, 'split').yields(null, chance.n(chance.date, 2));
+                sandbox.stub(bulkApi, 'createJob').yields(null, chance.jobInfo());                
+                sandbox.stub(dataMapper, 'map').throws(error);
+                sandbox.stub(bulkApi, 'closeJob').yields();                
+
+                // when
+                bulk.load(opts, chance.word(), err => {
+                    expect(err).to.equal(expectedError);
+                    done();
+                });
+            });                
         });
     });
 
