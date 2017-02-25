@@ -18,6 +18,7 @@
     "json2csv": "^3.7.3",
     "lodash": "^4.17.4",
     "merge": "^1.2.0",
+    "progress": "^1.1.8",
     "properties-parser": "^0.3.1",
     "request": "^2.79.0",
     "xml2js": "^0.4.17"

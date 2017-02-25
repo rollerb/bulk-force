@@ -13,7 +13,7 @@ describe.only('bulk-force', () => {
         }
     });
 
-    it('load data from JSON', (done) => {
+    it.only('load data from JSON', (done) => {
         var data = chance.n(chance.account, 2);
 
         var opts = {
