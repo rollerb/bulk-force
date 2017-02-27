@@ -101,7 +101,7 @@
 
     
 
-    <h4 class="name" id="loadData"><span class="type-signature"></span>loadData<span class="signature">(opts, data, cb)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(opts, data, cb)</span><span class="type-signature"></span></h4>
 
     
 
@@ -250,13 +250,145 @@
 
         <tr>
             
+                <td class="name"><code>externalField</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">external field to use when upserting</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxBatchSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the maximum size of a batch; defaults to 2000</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mapFile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">mapping file to use to map field names or hardcoded values</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>toPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">folder path where results should be saved</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>auth</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#auth">auth</a></span>
+<span class="param-type">auth</span>
 
 
             
@@ -322,7 +454,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#loadDataCallback">loadDataCallback</a></span>
+<span class="param-type">function</span>
 
 
             
@@ -373,7 +505,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bulk-force.js.html">bulk-force.js</a>, <a href="bulk-force.js.html#line79">line 79</a>
+        <a href="bulk-force.js.html">bulk-force.js</a>, <a href="bulk-force.js.html#line168">line 168</a>
     </li></ul></dd>
     
 
@@ -400,171 +532,18 @@
 
 
         
-    
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-<h4 class="name" id="auth">auth</h4>
-
-
-
-
-<div class="description">
-    The OAuth2 security information.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>instanceUrl</code></td>
             
 
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the salesforce org instance where data should be loaded</td>
-        </tr>
-
     
 
-        <tr>
-            
-                <td class="name"><code>accessToken</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the OAuth2 access token</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bulk-force.js.html">bulk-force.js</a>, <a href="bulk-force.js.html#line50">line 50</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-
-    
-
-    <h4 class="name" id="loadDataCallback"><span class="type-signature"></span>loadDataCallback<span class="signature">(err, result)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="query"><span class="type-signature"></span>query<span class="signature">(opts, soql, cb)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Data load callback.
+    Bulk query data from Salesforce.
 </div>
 
 
@@ -600,30 +579,7 @@
 
         <tr>
             
-                <td class="name"><code>err</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">error message</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>result</code></td>
+                <td class="name"><code>opts</code></td>
             
 
             <td class="type">
@@ -639,7 +595,7 @@
 
             
 
-            <td class="description last">the result of the data load
+            <td class="description last">bulk loading options
                 <h6>Properties</h6>
                 
 
@@ -653,6 +609,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -665,46 +623,97 @@
 
         <tr>
             
-                <td class="name"><code>success</code></td>
+                <td class="name"><code>object</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;object></span>
+<span class="param-type">string</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">the successly results</td>
+            <td class="description last">the Salesforce object to query</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>error</code></td>
+                <td class="name"><code>toFile</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;object></span>
+<span class="param-type">string</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">the error results</td>
+            <td class="description last">file where the SOQL result should be saved</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>auth</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">auth</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the OAuth2 information</td>
         </tr>
 
     
@@ -712,6 +721,52 @@
 </table>
 
             </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>soql</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">SOQL to execute</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -752,7 +807,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bulk-force.js.html">bulk-force.js</a>, <a href="bulk-force.js.html#line59">line 59</a>
+        <a href="bulk-force.js.html">bulk-force.js</a>, <a href="bulk-force.js.html#line249">line 249</a>
     </li></ul></dd>
     
 
@@ -778,7 +833,9 @@
 
 
 
-            
+        
+    
+
     
 
     
@@ -792,13 +849,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="bulk-force.html">bulk-force</a></li></ul><h3>Global</h3><ul><li><a href="global.html#loadData">loadData</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="bulk-force.html">bulk-force</a></li></ul><h3>Global</h3><ul><li><a href="global.html#load">load</a></li><li><a href="global.html#query">query</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jan 29 2017 01:05:27 GMT-0600 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Feb 26 2017 20:24:29 GMT-0600 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

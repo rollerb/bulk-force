@@ -36,6 +36,7 @@
     "test": "mocha test/* --timeout 60000",
     "unit": "mocha test/unit",
     "int": "DEBUG=bulk-force:* mocha test/int --timeout 60000",
+    "docs": "jsdoc -r -d ./docs ./lib",
     "coverage": "istanbul cover _mocha -- test/unit && open coverage/lcov-report/index.html"
   },
   "keywords": [
