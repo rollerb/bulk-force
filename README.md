@@ -2,11 +2,9 @@
 
 # bulk-force
 
-After working with the official Salesforce [Data Loader](https://developer.salesforce.com/page/Data_Loader) for a while, it became a little painful to do what felt like simple tasks. For example: deleting data conditionally, sorting data to avoid table locking, to name a few. It was with this simplicity that motivated me to use the convenience of Node, and an eye on the features I wanted to create `bulk-force`.
+After working with the official Salesforce [Data Loader](https://developer.salesforce.com/page/Data_Loader) for a while, it became a little tedious to do what felt like simple tasks. For example: deleting data conditionally, sorting data to avoid table locking, or simply wanting to load data from a terminal on a Mac. With the goal of simplifying my Salesforce bulk loading tasks, combined with the convenience of Node, `bulk-force` was created.
 
 [API Documentation](https://rollerb.github.io/bulk-force)
-
----
 
 ## Content
 
