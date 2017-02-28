@@ -184,7 +184,7 @@ By providing a mapping file, you can map fields and provide hardcoded values. He
 ```properties
 # my_map.properties
 customerName=Name
-[value]foo=Site # will load the value 'Foo' into the field 'Site' for all records processed
+[value]foo=Site # will load the value 'foo' into the field 'Site' for all records processed
 ```
 
 And this is how you would use the mapping file while loading:
