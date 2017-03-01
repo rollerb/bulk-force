@@ -10,12 +10,13 @@ After working with the official Salesforce [Data Loader](https://developer.sales
 
 * [Quick Start](#quick-start)
 * [Security](#security)
-* [Bulk Load Options](#bulk-load-options)
-  * [load data from CSV file](#load-data-from-csv-file)
-  * [save load results to path](#save-load-result-to-path)
-  * [external field](#external-field)
-  * [max batch size](#max-batch-size)
-  * [mapping file](#mapping-file)
+* Bulk Load
+  * [Request Options](#bulk-load-options)
+    * [load data from CSV file](#load-data-from-csv-file)
+    * [save load results to path](#save-load-result-to-path)
+    * [external field](#external-field)
+    * [max batch size](#max-batch-size)
+    * [mapping file](#mapping-file)
 * [Bulk Query Options](#bulk-query-options)
 
 ---
